@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advanced Fitness Tracker Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #f3f3f3;
+            --text-color: #333;
+            --card-bg: white;
+            --header-bg: #2e8b57;
+            --nav-bg: #246d45;
+        }
+
+        body.dark {
+            --bg-color: #1e1e1e;
+            --text-color: #d6d3d3;
+            --card-bg: #2c2c2c;
+            --header-bg: #1a5e3f;
+            --nav-bg: #14402d;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        header {
+            background: var(--header-bg);
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        nav {
+            background: var(--nav-bg);
+            color: white;
+            display: flex;
+            justify-content: center;
+            padding: 0.5rem;
+        }
+
+        nav a {
+            color: white;
+            margin: 0 1rem;
+            text-decoration: none;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            padding: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: var(--text-color);
+        }
+
+        input[type="number"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            background: #2e8b57;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #246d45;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul li {
+            margin: 0.5rem 0;
+        }
+
+        .theme-toggle {
+            margin: 1rem auto;
+            text-align: center;
+        }
+
+        #userForm {
+            max-width: 400px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: var(--card-bg);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        #mainDashboard {
+            display: none;
+        }
+
+        #welcomeMessage {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        #adviceCard {
+            grid-column: 1 / -1;
+            background: #fffae6;
+            color: #333;
+            padding: 1rem;
+            border-left: 6px solid #ffcc00;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Advanced Fitness Tracker Dashboard</h1>
+    </header>
+
+    <div id="userForm">
+        <h2>Welcome! Please enter your details</h2>
+        <input type="text" id="userName" placeholder="Enter your name" required />
+        <input type="number" id="userAge" placeholder="Enter your age" required />
+        <button onclick="submitUserInfo()">Start Tracking</button>
+    </div>
+
+    <div id="mainDashboard">
+        <nav>
+            <a href="#workout">Workout</a>
+            <a href="#water">Water</a>
+            <a href="#bmi">BMI</a>
+            <a href="#meals">Meals</a>
+            <a href="#sleep">Sleep</a>
+            <a href="#mood">Mood</a>
+        </nav>
+
+        <div class="theme-toggle">
+            <button onclick="toggleTheme()">Toggle Dark Mode</button>
+        </div>
+
+        <div id="welcomeMessage"></div>
+
+        <div class="container">
+            <div class="card" id="workout">
+                <h2>Workout Log</h2>
+                <input type="text" id="workoutInput" placeholder="e.g. 30 mins running">
+                <button onclick="addWorkout()">Add Workout</button>
+                <ul id="workoutList"></ul>
+            </div>
+
+            <div class="card" id="water">
+                <h2>Water Intake (Liters)</h2>
+                <input type="number" id="waterInput" placeholder="e.g. 2">
+                <button onclick="addWater()">Log Water</button>
+                <ul id="waterList"></ul>
+                <canvas id="waterChart" width="200" height="100"></canvas>
+            </div>
+
+            <div class="card" id="bmi">
+                <h2>BMI Calculator</h2>
+                <input type="number" id="height" placeholder="Height (cm)">
+                <input type="number" id="weight" placeholder="Weight (kg)">
+                <button id="bmiButton">Calculate BMI</button>
+                <p id="bmiResult"></p>
+            </div>
+
+            <div class="card" id="meals">
+                <h2>Meal Log</h2>
+                <input type="text" id="mealInput" placeholder="e.g. Chicken Salad">
+                <select id="mealType">
+                    <option value="Breakfast">Breakfast</option>
+                    <option value="Lunch">Lunch</option>
+                    <option value="Dinner">Dinner</option>
+                    <option value="Snack">Snack</option>
+                </select>
+                <button onclick="addMeal()">Log Meal</button>
+                <ul id="mealList"></ul>
+            </div>
+
+            <div class="card" id="sleep">
+                <h2>Sleep Tracker</h2>
+                <input type="number" id="sleepInput" placeholder="Hours slept">
+                <button onclick="addSleep(); showAdvice();">Log Sleep</button>
+                <ul id="sleepList"></ul>
+            </div>
+
+            <div class="card" id="mood">
+                <h2>Mood Tracker</h2>
+                <select id="moodInput">
+                    <option value="">Select your mood</option>
+                    <option value="😊 Happy">😊 Happy</option>
+                    <option value="😐 Neutral">😐 Neutral</option>
+                    <option value="😔 Sad">😔 Sad</option>
+                    <option value="😡 Angry">😡 Angry</option>
+                    <option value="😴 Tired">😴 Tired</option>
+                </select>
+                <button onclick="addMood(); showAdvice();">Log Mood</button>
+                <ul id="moodList"></ul>
+            </div>
+
+            <div class="card" id="adviceCard" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+
+        function addWorkout() {
+            const input = document.getElementById("workoutInput");
+            const value = input.value.trim();
+            if (value) {
+                const list = document.getElementById("workoutList");
+                const li = document.createElement("li");
+                li.textContent = value;
+                list.appendChild(li);
+                input.value = "";
+            }
+        }
+
+        function addWater() {
+            const input = document.getElementById("waterInput");
+            const value = parseFloat(input.value);
+            if (value && value > 0) {
+                const list = document.getElementById("waterList");
+                const li = document.createElement("li");
+                li.textContent = `${value} L`;
+                list.appendChild(li);
+                waterData.push(value);
+                localStorage.setItem("waterLog", JSON.stringify(waterData));
+                input.value = "";
+                showAdvice();
+            }
+        }
+
+        document.getElementById("bmiButton").addEventListener("click", function (){
+            const height = parseFloat(document.getElementById("height").value);
+            const weight = parseFloat(document.getElementById("weight").value);
+            const result = document.getElementById("bmiResult");
+            if (height > 0 && weight > 0) {
+                const bmi = (weight / ((height / 100) ** 2)).toFixed(2);
+                result.innerHTML = `Your BMI is ${bmi}`;
+                result.innerHTML += "<br>" + getBMICategory(bmi) ;
+            } else {
+                result.textContent = "Please enter valid height and weight.";
+            }
+
+        });
+
+        function getBMICategory(bmi) {
+            if (bmi < 18.5) return "Underweight";
+            if (bmi < 25) return "Normal weight";
+            if (bmi < 30) return "Overweight";
+            return "Obese";
+        }
+
+        
+
+        function addMeal() {
+            const meal = document.getElementById("mealInput").value.trim();
+            const type = document.getElementById("mealType").value;
+            if (meal) {
+                const list = document.getElementById("mealList");
+                const li = document.createElement("li");
+                li.textContent = `${type}: ${meal}`;
+                list.appendChild(li);
+                document.getElementById("mealInput").value = "";
+            }
+        }
+
+        function addSleep() {
+            const sleep = document.getElementById("sleepInput").value;
+            if (sleep && sleep > 0) {
+                const list = document.getElementById("sleepList");
+                const li = document.createElement("li");
+                li.textContent = `${sleep} hours`;
+                list.appendChild(li);
+                document.getElementById("sleepInput").value = "";
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle("dark");
+        }
+
+        function submitUserInfo() {
+            const name = document.getElementById("userName").value.trim();
+            const age = document.getElementById("userAge").value;
+            if (name && age > 0) {
+                document.getElementById("userForm").style.display = "none";
+                document.getElementById("mainDashboard").style.display = "block";
+                document.getElementById("welcomeMessage").textContent = `Welcome, ${name} (Age: ${age})`;
+            } else {
+                alert("Please enter both name and age correctly.");
+            }
+        }
+
+        function addMood() {
+            const mood = document.getElementById("moodInput").value;
+            if (mood) {
+                const list = document.getElementById("moodList");
+                const li = document.createElement("li");
+                const date = new Date().toLocaleDateString();
+                li.textContent = `${date}: ${mood}`;
+                list.appendChild(li);
+                document.getElementById("moodInput").value = "";
+            }
+        }
+
+        function showAdvice() {
+            const waterEntries = document.querySelectorAll("#waterList li");
+            const sleepEntries = document.querySelectorAll("#sleepList li");
+            let totalWater = 0;
+            waterEntries.forEach(entry => {
+                const val = parseFloat(entry.textContent);
+                if (!isNaN(val)) totalWater += val;
+            });
+
+            let totalSleep = 0;
+            sleepEntries.forEach(entry => {
+                const val = parseFloat(entry.textContent);
+                if (!isNaN(val)) totalSleep += val;
+            });
+
+            let advice = "";
+            if (totalSleep < 4) advice += "\u26A0\uFE0F You slept less than 4 hours. Try to get more rest.\n";
+            if (totalWater < 1) advice += "\u2615 Drink more water to stay hydrated.\n";
+            if (!advice) advice = "✅ You're doing great! Keep it up!";
+
+            const adviceCard = document.getElementById("adviceCard");
+            adviceCard.style.display = "block";
+            adviceCard.textContent = advice;
+        }
+    </script>
+</body>
+
+</html>
